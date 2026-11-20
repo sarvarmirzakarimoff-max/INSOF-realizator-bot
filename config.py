@@ -69,7 +69,7 @@ MIKSER = {
 }
 
 # ------------------------------------------------------------------ PLITA
-# Ковакли плиталар (ПК), 1 dona narxi ҚҚСsiz (prays-list «54 yangi narx»).
+# Плиталар (ПК), 1 dona narxi ҚҚСsiz (prays-list «54 yangi narx»).
 # ҚҚС 12% ustiga qo'shiladi. Nomi: ПК uzunlik(dm)-eni(dm)-yuklama
 PLITA_NARX = {
     "ПК 71-12-8": 1_950_000,

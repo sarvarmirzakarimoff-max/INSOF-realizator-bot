@@ -27,6 +27,6 @@ def boshqa_praylist(path):
 
 PRAYSLAR = {
     "beton": ("🚛 Beton", "INSOF_beton_prays_list.pdf", beton_praylist),
-    "plita": ("🧱 Kovakli plita (ПК)", "INSOF_plita_prays_list.pdf", plita_praylist),
+    "plita": ("🧱 Plita (ПК)", "INSOF_plita_prays_list.pdf", plita_praylist),
     "boshqa": ("📄 Boshqa mahsulotlar", "INSOF_boshqa_mahsulotlar_prays_list.pdf", boshqa_praylist),
 }

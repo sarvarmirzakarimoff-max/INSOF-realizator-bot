@@ -38,7 +38,7 @@ Realizatorlar botga **shaxsiy chatda** `/start` deb yozib ishlaydi, natija esa g
 Hamma narsa **`config.py`** faylida. Uni Notepad yoki VS Code bilan ochib tahrirlang, keyin botni qayta ishga tushiring.
 
 - `BETON_NARX` — beton markalari narxi (ҚҚСsiz).
-- `PLITA_NARX` — 50 ta ковакли плита (ПК) narxi (ҚҚСsiz, 1 dona).
+- `PLITA_NARX` — 50 ta плита (ПК) narxi (ҚҚСsiz, 1 dona).
 - `MIKSER` — miksyer 10 m³. To'liq miksyerga yo'l kira olinmaydi, chala miksyerga 10 km gacha 600 000 so'm (ҚҚСsiz) qo'shiladi.
 - `AVTOKRAN` — 700 000 so'm/soat, soatiga 10 ta plita, kamida 3 soat.
 - `TOLOV_SHAKLI` — naqd yoki perechisleniye bo'lganda ҚҚС qo'shiladimi (hozir ikkalasida ham qo'shiladi).

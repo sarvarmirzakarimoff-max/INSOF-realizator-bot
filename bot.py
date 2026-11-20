@@ -325,7 +325,7 @@ async def mahsulot_sora(m: Message, state: FSMContext):
             kb.button(text=f"{L / 10:g} м".replace(".", ","), callback_data=f"pL:{L}")
         kb.button(text="✍️ Boshqa", callback_data="mp:x")
         kb.adjust(5)
-        await m.answer("Ковакли плита (ПК). Uzunligini tanlang:", reply_markup=kb.as_markup())
+        await m.answer("Plita (ПК). Uzunligini tanlang:", reply_markup=kb.as_markup())
     await state.set_state(T.mahsulot)
 
 
