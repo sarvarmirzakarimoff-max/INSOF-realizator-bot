@@ -1,0 +1,8 @@
+# Maxfiy va shaxsiy ma'lumotlar — GitHub'ga yuklanmaydi
+.env
+*.db
+takliflar/
+venv/
+__pycache__/
+*.pyc
+namunalar/
