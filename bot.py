@@ -534,8 +534,11 @@ async def t_tolov_shakli(cb: CallbackQuery, state: FSMContext):
     await cb.message.edit_text(f"To'lov shakli: <b>{'Naqd' if k == 'naqd' else 'Perechisleniye'}</b>"
                                f" — {'ҚҚС 12% qo' + chr(39) + 'shiladi' if sh['qqs'] else 'ҚҚСsiz'}")
     await cb.answer()
-    await cb.message.answer("💵 Avans olindimi? Summani yozing (so'mda):", reply_markup=rk([B_AVANSSIZ]))
-    await state.set_state(T.avans)
+    # Avans so'ralmaydi (olib tashlangan)
+    t["avans"] = 0
+    await state.update_data(t=t)
+    await cb.message.answer("📅 Yetkazish muddati? (masalan: 25.11.2026 yoki «3 kun ichida»)", reply_markup=rk([B_OTKAZ]))
+    await state.set_state(T.muddat)
 
 
 @r.message(T.avans, F.text)
