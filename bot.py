@@ -108,6 +108,7 @@ class T(StatesGroup):  # tijorat taklifi
     tel = State()
     prorab = State()
     prorab_tel = State()
+    hudud = State()
     obyekt = State()
     mahsulot = State()
     plita_nomi = State()
@@ -248,8 +249,7 @@ async def t_prorab(m: Message, state: FSMContext):
     t = await _t(state)
     if m.text == B_OTKAZ:
         await state.update_data(t=t)
-        await m.answer("🏗 Obyekt nomi yoki manzili? (masalan: Gulbahor, Yunusobod 4-kvartal)", reply_markup=FAQAT_BEKOR)
-        await state.set_state(T.obyekt)
+        await t_hudud_sora(m, state)
         return
     t["mijoz"]["prorab"] = m.text.strip()
     await state.update_data(t=t)
@@ -265,15 +265,49 @@ async def t_prorab_tel(m: Message, state: FSMContext):
     elif m.text and m.text != B_OTKAZ:
         t["mijoz"]["prorab_tel"] = m.text.strip()
     await state.update_data(t=t)
-    await m.answer("🏗 Obyekt nomi yoki manzili? (masalan: Gulbahor, Yunusobod 4-kvartal)", reply_markup=FAQAT_BEKOR)
+    await t_hudud_sora(m, state)
+
+
+async def t_hudud_sora(m: Message, state: FSMContext):
+    await m.answer("📌 Obyekt manzili — hududni tanlang:", reply_markup=FAQAT_BEKOR)
+    await m.answer("Hudud:", reply_markup=hudud_kb())
+    await state.set_state(T.hudud)
+
+
+@r.callback_query(T.hudud, F.data.startswith("vl:") | F.data.startswith("tm:"))
+async def t_hudud(cb: CallbackQuery, state: FSMContext):
+    await cb.answer()
+    viloyatlar = list(C.HUDUDLAR)
+    if cb.data == "vl:orqa":
+        await cb.message.edit_text("Hudud:", reply_markup=hudud_kb())
+        return
+    if cb.data.startswith("vl:"):
+        i = int(cb.data[3:])
+        kb = InlineKeyboardBuilder()
+        for j, tm in enumerate(C.HUDUDLAR[viloyatlar[i]]):
+            kb.button(text=tm, callback_data=f"tm:{i}:{j}")
+        kb.button(text="⬅️ Orqaga", callback_data="vl:orqa")
+        kb.adjust(2)
+        await cb.message.edit_text(f"📌 {viloyatlar[i]} — tumanni tanlang:", reply_markup=kb.as_markup())
+        return
+    _, i, j = cb.data.split(":")
+    vil = viloyatlar[int(i)]
+    tuman = C.HUDUDLAR[vil][int(j)]
+    t = await _t(state)
+    t["mijoz"]["obyekt"] = f"{vil}, {tuman}"
+    await state.update_data(t=t)
+    await cb.message.edit_text(f"📌 {vil}, <b>{tuman}</b>")
+    await cb.message.answer("Mo'ljal? (mahalla, ko'cha yoki obyekt nomi)", reply_markup=rk([B_OTKAZ]))
     await state.set_state(T.obyekt)
 
 
 @r.message(T.obyekt, F.text)
 async def t_obyekt(m: Message, state: FSMContext):
     t = await _t(state)
-    t["mijoz"]["obyekt"] = m.text.strip()
+    if m.text != B_OTKAZ:
+        t["mijoz"]["obyekt"] = f'{t["mijoz"].get("obyekt", "")}, {m.text.strip()}'.strip(", ")
     await state.update_data(t=t)
+    await m.answer("Mahsulotni tanlaymiz.", reply_markup=FAQAT_BEKOR)
     await mahsulot_sora(m, state)
 
 

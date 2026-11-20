@@ -171,7 +171,7 @@ def plita_tashish(items, km):
         tur = " + ".join(qism)
     else:
         tur = f"{jami} шаланда"
-    izoh = f"{tur} · {km:g} км"
+    izoh = f"{tur} · {km:g} км".replace(".", ",")
     if km > PT["narxlar"][-1][0]:
         izoh += " (130 км дан узоқ — нарх келишилади)"
     return jami, xodka_narxi(km), izoh
