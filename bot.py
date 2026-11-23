@@ -369,7 +369,9 @@ async def t_plita(cb: CallbackQuery, state: FSMContext):
         narx = C.PLITA_NARX[nomi]
         await state.update_data(joriy={"nomi": nomi, "narx": narx, "izoh": C.plita_olcham(nomi), "birlik": "дона"})
         await cb.message.edit_text(f"Plita: <b>{e(nomi)}</b> ({C.plita_olcham(nomi)}) — {som(narx)} so'm/dona, ҚҚСsiz")
-        await cb.message.answer("Necha dona?")
+        kb = InlineKeyboardBuilder()
+        kb.button(text="⬅️ Boshqa o'lcham tanlash", callback_data="qayt:1")
+        await cb.message.answer("Necha dona?", reply_markup=kb.as_markup())
         await state.set_state(T.miqdor)
 
 
@@ -395,6 +397,14 @@ async def t_plita_narx(m: Message, state: FSMContext):
     await state.set_state(T.miqdor)
 
 
+@r.callback_query(T.miqdor, F.data == "qayt:1")
+async def t_qayt(cb: CallbackQuery, state: FSMContext):
+    await cb.answer()
+    await state.update_data(joriy=None)
+    await cb.message.edit_text("Bekor qilindi, boshqa o'lcham tanlang.")
+    await mahsulot_sora(cb.message, state)
+
+
 @r.message(T.miqdor, F.text)
 async def t_miqdor(m: Message, state: FSMContext):
     v = son(m.text)
@@ -406,12 +416,41 @@ async def t_miqdor(m: Message, state: FSMContext):
     j["soni"] = v
     t["mahsulotlar"].append(j)
     await state.update_data(t=t, joriy=None)
-    royxat = "\n".join(f"• {e(x['nomi'])} — {x['soni']:g} {x['birlik']}" for x in t["mahsulotlar"])
+    await royxat_korsat(m, state)
+
+
+async def royxat_korsat(m: Message, state: FSMContext):
+    t = await _t(state)
     kb = InlineKeyboardBuilder()
+    for i, x in enumerate(t["mahsulotlar"]):
+        kb.button(text=f"❌ {x['nomi']} — {x['soni']:g} {x['birlik']}", callback_data=f"del:{i}")
     kb.button(text="➕ Yana mahsulot", callback_data="yana:1")
-    kb.button(text="➡️ Davom etish", callback_data="yana:0")
-    await m.answer(f"Taklifdagi mahsulotlar:\n{royxat}", reply_markup=kb.as_markup())
+    if t["mahsulotlar"]:
+        kb.button(text="➡️ Davom etish", callback_data="yana:0")
+    kb.adjust(*([1] * len(t["mahsulotlar"])), 2)
+    if t["mahsulotlar"]:
+        royxat = "\n".join(f"{i + 1}. {e(x['nomi'])} — {x['soni']:g} {x['birlik']}"
+                           for i, x in enumerate(t["mahsulotlar"]))
+        matn = f"Taklifdagi mahsulotlar:\n{royxat}\n\n<i>Noto'g'ri yozilganini ❌ tugmasi bilan o'chiring.</i>"
+    else:
+        matn = "Taklifda mahsulot qolmadi. ➕ Yana mahsulot qo'shing."
+    await m.answer(matn, reply_markup=kb.as_markup())
     await state.set_state(T.yana)
+
+
+@r.callback_query(T.yana, F.data.startswith("del:"))
+async def t_ochir(cb: CallbackQuery, state: FSMContext):
+    d = await state.get_data()
+    t = d["t"]
+    i = int(cb.data[4:])
+    if i >= len(t["mahsulotlar"]):
+        await cb.answer("Bu allaqachon o'chirilgan")
+        return
+    x = t["mahsulotlar"].pop(i)
+    await state.update_data(t=t)
+    await cb.answer(f"O'chirildi: {x['nomi']}")
+    await cb.message.edit_text(f"❌ O'chirildi: {e(x['nomi'])} — {x['soni']:g} {x['birlik']}")
+    await royxat_korsat(cb.message, state)
 
 
 @r.callback_query(T.yana, F.data.startswith("yana:"))
@@ -419,6 +458,9 @@ async def t_yana(cb: CallbackQuery, state: FSMContext):
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer()
     if cb.data == "yana:1":
+        await mahsulot_sora(cb.message, state)
+        return
+    if not (await _t(state))["mahsulotlar"]:
         await mahsulot_sora(cb.message, state)
         return
     await cb.message.answer(
